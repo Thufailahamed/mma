@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { PBKDF2_ITERATIONS, hashPassword, needsRehash, verifyPassword } from '../src/crypto/password'
+import {
+  PBKDF2_ITERATIONS,
+  PBKDF2_MAX_ITERATIONS,
+  hashPassword,
+  needsRehash,
+  verifyPassword,
+} from '../src/crypto/password'
 import { base64UrlDecode, base64UrlEncode, timingSafeEqual } from '../src/crypto/encoding'
 import { generateSessionToken, hashToken } from '../src/crypto/token'
 
@@ -31,6 +37,10 @@ describe('password hashing', () => {
     expect(first).not.toBe(second)
     await expect(verifyPassword('same-password', first)).resolves.toBe(true)
     await expect(verifyPassword('same-password', second)).resolves.toBe(true)
+  })
+
+  it('never exceeds the Workers runtime ceiling', () => {
+    expect(PBKDF2_ITERATIONS).toBeLessThanOrEqual(PBKDF2_MAX_ITERATIONS)
   })
 
   it('flags a stored hash with too few iterations for rehash', async () => {

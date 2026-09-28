@@ -25,10 +25,10 @@ if (password.length < 12) {
   process.exit(1)
 }
 
-// Identical format and iteration count to the Worker's WebCrypto implementation
-// in apps/api/src/crypto/password.ts, so a seeded admin logs in through the
-// real login path.
-const ITERATIONS = 310_000
+// Must match PBKDF2_ITERATIONS in apps/api/src/crypto/password.ts exactly.
+// Cloudflare's WebCrypto rejects anything above 100,000, and
+// test/seed-script.test.ts fails the build if the two ever drift.
+const ITERATIONS = 100_000
 const salt = randomBytes(16)
 const derived = pbkdf2Sync(password, salt, ITERATIONS, 32, 'sha256')
 const hash = `pbkdf2_sha256$${ITERATIONS}$${salt.toString('base64')}$${derived.toString('base64')}`

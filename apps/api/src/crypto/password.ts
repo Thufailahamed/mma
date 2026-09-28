@@ -1,8 +1,25 @@
 import { base64Decode, base64Encode, timingSafeEqual } from './encoding'
 
 export const PASSWORD_ALGORITHM = 'pbkdf2_sha256'
-/** OWASP's current floor for PBKDF2-SHA256. */
-export const PBKDF2_ITERATIONS = 310_000
+
+/**
+ * Cloudflare's WebCrypto implementation rejects PBKDF2 above 100,000
+ * iterations with NotSupportedError. This is a hard platform ceiling, and
+ * `wrangler dev` does NOT enforce it — only a real deploy does, so a value
+ * above the cap passes every local test and then 500s in production.
+ *
+ * 100,000 is below OWASP's 600,000 recommendation for PBKDF2-HMAC-SHA256.
+ * That gap is a real tradeoff of running on Workers: the alternative is a
+ * memory-hard KDF such as scrypt, which has no iteration cap but costs more
+ * CPU and adds a dependency. Raising this constant is safe because the stored
+ * hash carries its own iteration count and needsRehash() upgrades old rows on
+ * the next successful login.
+ */
+export const PBKDF2_ITERATIONS = 100_000
+
+/** The runtime rejects anything above this. Pinned by a unit test. */
+export const PBKDF2_MAX_ITERATIONS = 100_000
+
 const KEY_BYTES = 32
 const SALT_BYTES = 16
 

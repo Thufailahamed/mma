@@ -2,7 +2,7 @@ import { AppError, levelForXp } from '@mma/shared'
 import { describe, expect, it, vi } from 'vitest'
 import { buildAuthService } from '../src/services/auth-service'
 import { SESSION_TTL_MS, cookieOptions, csrfCookieOptions } from '../src/services/session-service'
-import { hashPassword } from '../src/crypto/password'
+import { PBKDF2_ITERATIONS, hashPassword } from '../src/crypto/password'
 
 interface StubUser {
   id: string
@@ -81,7 +81,7 @@ describe('authService.register', () => {
 
     expect(user.role).toBe('USER')
     const stored = rows.get(user.id)!
-    expect(stored.passwordHash).toMatch(/^pbkdf2_sha256\$310000\$/)
+    expect(stored.passwordHash).toMatch(new RegExp(`^pbkdf2_sha256\\$${PBKDF2_ITERATIONS}\\$`))
     expect(stored.passwordHash).not.toContain(VALID.password)
   })
 
@@ -149,7 +149,7 @@ describe('authService.login', () => {
     await auth.login({ email: VALID.email, password: VALID.password })
 
     expect(users.updatePasswordHash).toHaveBeenCalled()
-    expect(rows.get(registered.id)!.passwordHash).toContain('$310000$')
+    expect(rows.get(registered.id)!.passwordHash).toContain(`$${PBKDF2_ITERATIONS}$`)
   })
 
   it('leaves a current hash untouched on login', async () => {

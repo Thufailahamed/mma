@@ -55,7 +55,6 @@ function env(overrides: Partial<Env> = {}): Env {
           Response.json({ allowed: true, remaining: 59, retryAfterSeconds: 60 }),
       }),
     } as unknown as DurableObjectNamespace,
-    SESSION_SECRET: 'a'.repeat(32),
     ENVIRONMENT: 'development',
     ...overrides,
   }

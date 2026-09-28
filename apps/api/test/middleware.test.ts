@@ -85,7 +85,6 @@ const DUMMY_ENV = {
   DB: {} as D1Database,
   MEDIA: {} as R2Bucket,
   RATE_LIMITER: {} as DurableObjectNamespace,
-  SESSION_SECRET: 'a'.repeat(32),
   ENVIRONMENT: 'development',
 } satisfies Env
 
