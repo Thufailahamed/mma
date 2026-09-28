@@ -45,3 +45,12 @@ export type ArticleCategory = (typeof ARTICLE_CATEGORIES)[number]
 
 export const POLL_STATUSES = ['DRAFT', 'OPEN', 'CLOSED'] as const
 export type PollStatus = (typeof POLL_STATUSES)[number]
+
+export const TRIVIA_DIFFICULTIES = ['EASY', 'MEDIUM', 'HARD', 'EXPERT'] as const
+export type TriviaDifficulty = (typeof TRIVIA_DIFFICULTIES)[number]
+
+export const REPORT_STATUSES = ['OPEN', 'REVIEWING', 'RESOLVED', 'DISMISSED'] as const
+export type ReportStatus = (typeof REPORT_STATUSES)[number]
+
+export const COMMENT_STATUSES = ['VISIBLE', 'PENDING', 'HIDDEN', 'DELETED'] as const
+export type CommentStatus = (typeof COMMENT_STATUSES)[number]

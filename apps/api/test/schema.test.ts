@@ -50,3 +50,34 @@ describe('d1 schema — editorial and engagement', () => {
     expect(findTable(name), `table "${name}" is not exported from @mma/db/schema`).toBeDefined()
   })
 })
+
+const PLATFORM_TABLES = [
+  'trivia_categories',
+  'trivia_questions',
+  'trivia_answers',
+  'trivia_attempts',
+  'trivia_daily_schedules',
+  'achievements',
+  'user_achievements',
+  'follows',
+  'comments',
+  'notifications',
+  'battles',
+  'battle_predictions',
+  'prediction_reactions',
+  'media_assets',
+  'reports',
+]
+
+describe('d1 schema — trivia, gamification, community, platform', () => {
+  it.each(PLATFORM_TABLES)('exports the %s table', (name) => {
+    expect(findTable(name), `table "${name}" is not exported from @mma/db/schema`).toBeDefined()
+  })
+
+  it('defines exactly 42 tables in total', () => {
+    const names = Object.values(schema)
+      .filter(isTable)
+      .map(getTableName)
+    expect(new Set(names).size).toBe(42)
+  })
+})
