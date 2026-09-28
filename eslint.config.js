@@ -11,6 +11,7 @@ export default tseslint.config(
       '**/.open-next/**',
       '**/next-env.d.ts',
       'eslint.config.js',
+      'scripts/seed-admin.mjs',
     ],
   },
   js.configs.recommended,
@@ -62,5 +63,13 @@ export default tseslint.config(
   {
     files: ['**/*.mjs'],
     ...tseslint.configs.disableTypeChecked,
+    languageOptions: {
+      globals: {
+        process: 'readonly',
+        console: 'readonly',
+        Buffer: 'readonly',
+        URL: 'readonly',
+      },
+    },
   },
 )
