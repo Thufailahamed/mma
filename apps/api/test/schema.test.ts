@@ -1,4 +1,5 @@
 import { getTableName, isTable } from 'drizzle-orm'
+import type { Table } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
 import * as schema from '@mma/db/schema'
 
@@ -76,8 +77,8 @@ describe('d1 schema — trivia, gamification, community, platform', () => {
 
   it('defines exactly 42 tables in total', () => {
     const names = Object.values(schema)
-      .filter(isTable)
-      .map(getTableName)
+      .map((value) => (isTable(value) ? getTableName(value as Table) : null))
+      .filter((value): value is string => value !== null)
     expect(new Set(names).size).toBe(42)
   })
 })

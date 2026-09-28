@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm'
+import type { AnySQLiteColumn } from 'drizzle-orm/sqlite-core'
 import {
-  AnySQLiteColumn,
   check,
   index,
   integer,
