@@ -12,6 +12,7 @@ export default tseslint.config(
       '**/next-env.d.ts',
       'eslint.config.js',
       'scripts/seed-admin.mjs',
+      '**/postcss.config.mjs',
     ],
   },
   js.configs.recommended,
