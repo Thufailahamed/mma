@@ -69,7 +69,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       ) : null}
 
       <label className="block space-y-1">
-        <span className="text-sm font-medium">Email</span>
+        <span className="inline-flex min-h-11 items-center text-sm font-medium">Email</span>
         <input
           type="email"
           name="email"
@@ -86,7 +86,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       {mode === 'register' ? (
         <>
           <label className="block space-y-1">
-            <span className="text-sm font-medium">Username</span>
+            <span className="inline-flex min-h-11 items-center text-sm font-medium">Username</span>
             <input
               name="username"
               autoComplete="username"
@@ -100,7 +100,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           </label>
 
           <label className="block space-y-1">
-            <span className="text-sm font-medium">Display name</span>
+            <span className="inline-flex min-h-11 items-center text-sm font-medium">Display name</span>
             <input
               name="displayName"
               autoComplete="name"
@@ -116,7 +116,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       ) : null}
 
       <label className="block space-y-1">
-        <span className="text-sm font-medium">Password</span>
+        <span className="inline-flex min-h-11 items-center text-sm font-medium">Password</span>
         <input
           type="password"
           name="password"
@@ -133,7 +133,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       <button
         type="submit"
         disabled={pending}
-        className="h-11 w-full rounded-md bg-primary font-semibold text-primary-foreground transition-colors hover:bg-live disabled:opacity-60"
+        className="flex h-11 w-full items-center justify-center rounded-md bg-primary font-semibold text-primary-foreground transition-colors hover:bg-live disabled:opacity-60"
       >
         {pending ? 'Working…' : mode === 'login' ? 'Sign in' : 'Create account'}
       </button>

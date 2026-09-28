@@ -30,7 +30,7 @@ export function UserMenu({ displayName }: UserMenuProps) {
       onClick={() => {
         void signOut()
       }}
-      className="rounded-md border border-border px-3 py-1.5 text-sm font-semibold transition-colors hover:border-live hover:text-live disabled:opacity-60"
+      className="inline-flex min-h-11 items-center rounded-md border border-border px-3 text-sm font-semibold transition-colors hover:border-live hover:text-live disabled:opacity-60"
     >
       {pending ? 'Signing out…' : `Sign out ${displayName}`}
     </button>

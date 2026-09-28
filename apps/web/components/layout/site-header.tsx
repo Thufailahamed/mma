@@ -20,7 +20,10 @@ export function SiteHeader({ displayName }: SiteHeaderProps) {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-6 px-4">
-        <Link href="/" className="font-display text-lg font-extrabold tracking-tight">
+        <Link
+          href="/"
+          className="inline-flex min-h-11 items-center font-display text-lg font-extrabold tracking-tight"
+        >
           CAGE
         </Link>
 
@@ -29,7 +32,7 @@ export function SiteHeader({ displayName }: SiteHeaderProps) {
             <Link
               key={item.href}
               href={item.href}
-              className="transition-colors hover:text-foreground"
+              className="inline-flex min-h-11 items-center transition-colors hover:text-foreground"
             >
               {item.label}
             </Link>
@@ -45,7 +48,7 @@ export function SiteHeader({ displayName }: SiteHeaderProps) {
         ) : (
           <Link
             href="/login"
-            className="rounded-md border border-border px-3 py-1.5 text-sm font-semibold transition-colors hover:border-live hover:text-live"
+            className="inline-flex min-h-11 items-center rounded-md border border-border px-3 text-sm font-semibold transition-colors hover:border-live hover:text-live"
           >
             Sign in
           </Link>

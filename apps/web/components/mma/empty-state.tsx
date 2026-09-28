@@ -33,7 +33,7 @@ export function EmptyState({ icon: Icon, title, description, action, className }
       {action ? (
         <Link
           href={action.href}
-          className="mt-1 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-live"
+          className="mt-1 inline-flex min-h-11 items-center rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-live"
         >
           {action.label}
         </Link>
