@@ -265,4 +265,183 @@ CREATE TABLE `rankings` (
 --> statement-breakpoint
 CREATE UNIQUE INDEX `rankings_division_date_fighter_unique` ON `rankings` (`division_id`,`ranking_date`,`fighter_id`);--> statement-breakpoint
 CREATE INDEX `rankings_promotion_division_date_idx` ON `rankings` (`promotion_id`,`division_id`,`ranking_date`);--> statement-breakpoint
-CREATE INDEX `rankings_fighter_idx` ON `rankings` (`fighter_id`);
+CREATE INDEX `rankings_fighter_idx` ON `rankings` (`fighter_id`);--> statement-breakpoint
+CREATE TABLE `article_events` (
+	`article_id` text NOT NULL,
+	`event_id` text NOT NULL,
+	PRIMARY KEY(`article_id`, `event_id`),
+	FOREIGN KEY (`article_id`) REFERENCES `articles`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`event_id`) REFERENCES `events`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE INDEX `article_events_event_idx` ON `article_events` (`event_id`);--> statement-breakpoint
+CREATE TABLE `article_fighters` (
+	`article_id` text NOT NULL,
+	`fighter_id` text NOT NULL,
+	PRIMARY KEY(`article_id`, `fighter_id`),
+	FOREIGN KEY (`article_id`) REFERENCES `articles`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`fighter_id`) REFERENCES `fighters`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE INDEX `article_fighters_fighter_idx` ON `article_fighters` (`fighter_id`);--> statement-breakpoint
+CREATE TABLE `article_fights` (
+	`article_id` text NOT NULL,
+	`fight_id` text NOT NULL,
+	PRIMARY KEY(`article_id`, `fight_id`),
+	FOREIGN KEY (`article_id`) REFERENCES `articles`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`fight_id`) REFERENCES `fights`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE INDEX `article_fights_fight_idx` ON `article_fights` (`fight_id`);--> statement-breakpoint
+CREATE TABLE `article_revisions` (
+	`id` text PRIMARY KEY NOT NULL,
+	`article_id` text NOT NULL,
+	`editor_id` text NOT NULL,
+	`title` text NOT NULL,
+	`content` text NOT NULL,
+	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
+	FOREIGN KEY (`article_id`) REFERENCES `articles`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`editor_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE restrict
+);
+--> statement-breakpoint
+CREATE INDEX `article_revisions_article_created_idx` ON `article_revisions` (`article_id`,`created_at`);--> statement-breakpoint
+CREATE TABLE `article_tags` (
+	`article_id` text NOT NULL,
+	`tag_id` text NOT NULL,
+	PRIMARY KEY(`article_id`, `tag_id`),
+	FOREIGN KEY (`article_id`) REFERENCES `articles`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`tag_id`) REFERENCES `tags`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE INDEX `article_tags_tag_idx` ON `article_tags` (`tag_id`);--> statement-breakpoint
+CREATE TABLE `articles` (
+	`id` text PRIMARY KEY NOT NULL,
+	`author_id` text NOT NULL,
+	`title` text NOT NULL,
+	`slug` text NOT NULL,
+	`excerpt` text,
+	`content` text NOT NULL,
+	`cover_image_url` text,
+	`category` text NOT NULL,
+	`status` text DEFAULT 'DRAFT' NOT NULL,
+	`published_at` integer,
+	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
+	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
+	FOREIGN KEY (`author_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE restrict,
+	CONSTRAINT "articles_status_check" CHECK("articles"."status" IN ('DRAFT','PUBLISHED','ARCHIVED')),
+	CONSTRAINT "articles_category_check" CHECK("articles"."category" IN ('ANALYSIS','FIGHT_BREAKDOWN','OPINION','NEWS','INTERVIEW','RANKINGS','HISTORY')),
+	CONSTRAINT "articles_published_at_required" CHECK("articles"."status" <> 'PUBLISHED' OR "articles"."published_at" IS NOT NULL)
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `articles_slug_unique` ON `articles` (`slug`);--> statement-breakpoint
+CREATE INDEX `articles_author_idx` ON `articles` (`author_id`);--> statement-breakpoint
+CREATE INDEX `articles_status_published_idx` ON `articles` (`status`,`published_at`);--> statement-breakpoint
+CREATE INDEX `articles_category_idx` ON `articles` (`category`);--> statement-breakpoint
+CREATE TABLE `tags` (
+	`id` text PRIMARY KEY NOT NULL,
+	`name` text NOT NULL,
+	`slug` text NOT NULL
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `tags_slug_unique` ON `tags` (`slug`);--> statement-breakpoint
+CREATE UNIQUE INDEX `tags_name_unique` ON `tags` (`name`);--> statement-breakpoint
+CREATE TABLE `live_event_snapshots` (
+	`id` text PRIMARY KEY NOT NULL,
+	`event_id` text NOT NULL,
+	`state` text NOT NULL,
+	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
+	FOREIGN KEY (`event_id`) REFERENCES `events`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `live_event_snapshots_event_unique` ON `live_event_snapshots` (`event_id`);--> statement-breakpoint
+CREATE INDEX `live_event_snapshots_updated_at_idx` ON `live_event_snapshots` (`updated_at`);--> statement-breakpoint
+CREATE TABLE `live_round_scores` (
+	`id` text PRIMARY KEY NOT NULL,
+	`user_id` text NOT NULL,
+	`fight_id` text NOT NULL,
+	`round_number` integer NOT NULL,
+	`fighter_a_score` integer NOT NULL,
+	`fighter_b_score` integer NOT NULL,
+	`submitted_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
+	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`fight_id`) REFERENCES `fights`(`id`) ON UPDATE no action ON DELETE cascade,
+	CONSTRAINT "live_round_scores_number_valid" CHECK("live_round_scores"."round_number" BETWEEN 1 AND 5),
+	CONSTRAINT "live_round_scores_valid_combination" CHECK((
+        ("live_round_scores"."fighter_a_score" = 10 AND "live_round_scores"."fighter_b_score" BETWEEN 8 AND 9) OR
+        ("live_round_scores"."fighter_a_score" BETWEEN 8 AND 9 AND "live_round_scores"."fighter_b_score" = 10) OR
+        ("live_round_scores"."fighter_a_score" = 10 AND "live_round_scores"."fighter_b_score" = 10) OR
+        ("live_round_scores"."fighter_a_score" = 9 AND "live_round_scores"."fighter_b_score" = 9) OR
+        ("live_round_scores"."fighter_a_score" = 10 AND "live_round_scores"."fighter_b_score" = 7) OR
+        ("live_round_scores"."fighter_a_score" = 7 AND "live_round_scores"."fighter_b_score" = 10)
+      ))
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `live_round_scores_user_fight_round_unique` ON `live_round_scores` (`user_id`,`fight_id`,`round_number`);--> statement-breakpoint
+CREATE INDEX `live_round_scores_fight_round_idx` ON `live_round_scores` (`fight_id`,`round_number`);--> statement-breakpoint
+CREATE TABLE `poll_options` (
+	`id` text PRIMARY KEY NOT NULL,
+	`poll_id` text NOT NULL,
+	`label` text NOT NULL,
+	`sort_order` integer DEFAULT 0 NOT NULL,
+	FOREIGN KEY (`poll_id`) REFERENCES `polls`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `poll_options_poll_label_unique` ON `poll_options` (`poll_id`,`label`);--> statement-breakpoint
+CREATE INDEX `poll_options_poll_idx` ON `poll_options` (`poll_id`);--> statement-breakpoint
+CREATE TABLE `poll_votes` (
+	`poll_id` text NOT NULL,
+	`option_id` text NOT NULL,
+	`user_id` text NOT NULL,
+	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
+	PRIMARY KEY(`poll_id`, `user_id`),
+	FOREIGN KEY (`poll_id`) REFERENCES `polls`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`option_id`) REFERENCES `poll_options`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE INDEX `poll_votes_option_idx` ON `poll_votes` (`option_id`);--> statement-breakpoint
+CREATE INDEX `poll_votes_user_idx` ON `poll_votes` (`user_id`);--> statement-breakpoint
+CREATE TABLE `polls` (
+	`id` text PRIMARY KEY NOT NULL,
+	`question` text NOT NULL,
+	`status` text DEFAULT 'DRAFT' NOT NULL,
+	`event_id` text,
+	`fight_id` text,
+	`opens_at` integer,
+	`closes_at` integer,
+	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
+	FOREIGN KEY (`event_id`) REFERENCES `events`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`fight_id`) REFERENCES `fights`(`id`) ON UPDATE no action ON DELETE cascade,
+	CONSTRAINT "polls_status_check" CHECK("polls"."status" IN ('DRAFT','OPEN','CLOSED')),
+	CONSTRAINT "polls_window_order" CHECK("polls"."opens_at" IS NULL OR "polls"."closes_at" IS NULL OR "polls"."closes_at" > "polls"."opens_at"),
+	CONSTRAINT "polls_exactly_one_target" CHECK(((CASE WHEN "polls"."event_id" IS NULL THEN 0 ELSE 1 END) + (CASE WHEN "polls"."fight_id" IS NULL THEN 0 ELSE 1 END)) = 1)
+);
+--> statement-breakpoint
+CREATE INDEX `polls_event_idx` ON `polls` (`event_id`);--> statement-breakpoint
+CREATE INDEX `polls_fight_idx` ON `polls` (`fight_id`);--> statement-breakpoint
+CREATE INDEX `polls_status_idx` ON `polls` (`status`);--> statement-breakpoint
+CREATE TABLE `predictions` (
+	`id` text PRIMARY KEY NOT NULL,
+	`user_id` text NOT NULL,
+	`fight_id` text NOT NULL,
+	`predicted_winner_id` text NOT NULL,
+	`predicted_method` text NOT NULL,
+	`predicted_round` integer,
+	`bonus_answers` text,
+	`scoring_version` text NOT NULL,
+	`points_earned` integer DEFAULT 0 NOT NULL,
+	`is_correct` integer,
+	`submitted_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
+	`resolved_at` integer,
+	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`fight_id`) REFERENCES `fights`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`predicted_winner_id`) REFERENCES `fighters`(`id`) ON UPDATE no action ON DELETE cascade,
+	CONSTRAINT "predictions_round_valid" CHECK("predictions"."predicted_round" IS NULL OR "predictions"."predicted_round" BETWEEN 1 AND 5),
+	CONSTRAINT "predictions_points_non_negative" CHECK("predictions"."points_earned" >= 0),
+	CONSTRAINT "predictions_resolved_has_correct" CHECK("predictions"."resolved_at" IS NULL OR "predictions"."is_correct" IS NOT NULL)
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `predictions_user_fight_unique` ON `predictions` (`user_id`,`fight_id`);--> statement-breakpoint
+CREATE INDEX `predictions_fight_idx` ON `predictions` (`fight_id`);--> statement-breakpoint
+CREATE INDEX `predictions_user_submitted_idx` ON `predictions` (`user_id`,`submitted_at`);--> statement-breakpoint
+CREATE INDEX `predictions_user_points_idx` ON `predictions` (`user_id`,`points_earned`);

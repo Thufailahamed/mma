@@ -28,3 +28,20 @@ export type FightResult = (typeof FIGHT_RESULTS)[number]
 
 export const FIGHT_METHODS = ['KO', 'TKO', 'SUBMISSION', 'DECISION', 'DRAW', 'NO_CONTEST'] as const
 export type FightMethod = (typeof FIGHT_METHODS)[number]
+
+export const ARTICLE_STATUSES = ['DRAFT', 'PUBLISHED', 'ARCHIVED'] as const
+export type ArticleStatus = (typeof ARTICLE_STATUSES)[number]
+
+export const ARTICLE_CATEGORIES = [
+  'ANALYSIS',
+  'FIGHT_BREAKDOWN',
+  'OPINION',
+  'NEWS',
+  'INTERVIEW',
+  'RANKINGS',
+  'HISTORY',
+] as const
+export type ArticleCategory = (typeof ARTICLE_CATEGORIES)[number]
+
+export const POLL_STATUSES = ['DRAFT', 'OPEN', 'CLOSED'] as const
+export type PollStatus = (typeof POLL_STATUSES)[number]
