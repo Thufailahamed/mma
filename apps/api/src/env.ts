@@ -6,6 +6,9 @@ export interface Env extends RateLimiterBinding {
   MEDIA: R2Bucket
   SESSION_SECRET: string
   ENVIRONMENT: 'development' | 'staging' | 'production'
+  /** Optional overrides; parsed per request so they need no redeploy. */
+  RATE_LIMIT_ANONYMOUS?: string
+  RATE_LIMIT_AUTHED?: string
 }
 
 export interface SessionUser {

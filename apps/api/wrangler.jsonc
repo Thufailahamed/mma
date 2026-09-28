@@ -59,7 +59,7 @@
           "bucket_name": "mma-media-staging"
         }
       ],
-      "vars": { "ENVIRONMENT": "staging" }
+      "vars": { "ENVIRONMENT": "staging", "RATE_LIMIT_ANONYMOUS": "60", "RATE_LIMIT_AUTHED": "300" }
     },
     "production": {
       "name": "mma-api-production",
@@ -77,7 +77,7 @@
           "bucket_name": "mma-media-production"
         }
       ],
-      "vars": { "ENVIRONMENT": "production" }
+      "vars": { "ENVIRONMENT": "production", "RATE_LIMIT_ANONYMOUS": "60", "RATE_LIMIT_AUTHED": "300" }
     }
   }
 }

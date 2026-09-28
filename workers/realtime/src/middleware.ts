@@ -6,7 +6,11 @@ export interface RateLimiterBinding {
 }
 
 export interface RateLimitOptions<E extends RateLimiterBinding> {
-  limit: number
+  /**
+   * Requests allowed per window. A function is resolved per request, so a
+   * limit can vary by environment without a redeploy.
+   */
+  limit: number | ((c: Context<{ Bindings: E }>) => number)
   windowMs: number
   /**
    * Return a stable per-caller key. This runs before authentication, so it must
@@ -20,14 +24,15 @@ export function ratelimit<E extends RateLimiterBinding = RateLimiterBinding>(
 ): MiddlewareHandler<{ Bindings: E }> {
   return async (c, next) => {
     const key = await options.key(c)
+    const limit = typeof options.limit === 'function' ? options.limit(c) : options.limit
     const id = c.env.RATE_LIMITER.idFromName(fnv1a(key))
 
     const response = await c.env.RATE_LIMITER.get(id).fetch('https://ratelimiter.internal', {
       method: 'POST',
-      body: JSON.stringify({ key, limit: options.limit, windowMs: options.windowMs }),
+      body: JSON.stringify({ key, limit, windowMs: options.windowMs }),
     })
     const verdict: RateLimitResult = await response.json()
-    c.header('X-RateLimit-Limit', String(options.limit))
+    c.header('X-RateLimit-Limit', String(limit))
     c.header('X-RateLimit-Remaining', String(verdict.remaining))
 
     if (!verdict.allowed) {
