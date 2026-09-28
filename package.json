@@ -8,6 +8,8 @@
   },
   "scripts": {
     "dev": "concurrently -n api,web -c magenta,cyan \"pnpm --filter @mma/api dev\" \"pnpm --filter @mma/web dev\"",
+    "dev:web": "pnpm --filter @mma/web dev",
+    "dev:api": "pnpm --filter @mma/api dev",
     "build": "pnpm --filter @mma/web build",
     "typecheck": "pnpm -r --parallel typecheck",
     "lint": "eslint .",
