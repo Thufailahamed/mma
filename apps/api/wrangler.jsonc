@@ -1,0 +1,83 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mma-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-26",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "mma-db",
+      "database_id": "00000000-0000-4000-8000-000000000000",
+      "migrations_dir": "../../database/migrations"
+    }
+  ],
+
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "mma-media"
+    }
+  ],
+
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "RATE_LIMITER",
+        "class_name": "RateLimiter"
+      }
+    ]
+  },
+
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["RateLimiter"]
+    }
+  ],
+
+  "vars": {
+    "ENVIRONMENT": "development"
+  },
+
+  "env": {
+    "staging": {
+      "name": "mma-api-staging",
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "mma-db-staging",
+          "database_id": "00000000-0000-4000-8000-000000000000",
+          "migrations_dir": "../../database/migrations"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "MEDIA",
+          "bucket_name": "mma-media-staging"
+        }
+      ],
+      "vars": { "ENVIRONMENT": "staging" }
+    },
+    "production": {
+      "name": "mma-api-production",
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "mma-db-production",
+          "database_id": "00000000-0000-4000-8000-000000000000",
+          "migrations_dir": "../../database/migrations"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "MEDIA",
+          "bucket_name": "mma-media-production"
+        }
+      ],
+      "vars": { "ENVIRONMENT": "production" }
+    }
+  }
+}
