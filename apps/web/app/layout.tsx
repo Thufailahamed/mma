@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import { SiteFooter } from '@/components/layout/site-footer'
 import { SiteHeader } from '@/components/layout/site-header'
 import { fontDisplay, fontMono, fontSans } from '@/lib/fonts'
@@ -19,9 +20,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body
         className={`${fontSans.variable} ${fontDisplay.variable} ${fontMono.variable} bg-background text-foreground antialiased`}
       >
-        <SiteHeader />
-        {children}
-        <SiteFooter />
+        <TooltipProvider>
+          <SiteHeader />
+          {children}
+          <SiteFooter />
+        </TooltipProvider>
       </body>
     </html>
   )
