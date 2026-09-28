@@ -14,13 +14,22 @@ const ISSUER_TTL_MS = 24 * 60 * 60 * 1000
  * rejected, making the auth flow unreachable.
  */
 export const csrfIssuer: AppMiddleware = async (c, next) => {
-  if (SAFE_METHODS.has(c.req.method) && readCookie(c.req.raw, CSRF_COOKIE) === undefined) {
-    const token = base64UrlEncode(crypto.getRandomValues(new Uint8Array(24)))
-    c.header(
-      'Set-Cookie',
-      `${CSRF_COOKIE}=${token}; ${csrfCookieOptions(new Date(Date.now() + ISSUER_TTL_MS))}`,
-      { append: true },
-    )
+  const shouldIssue =
+    SAFE_METHODS.has(c.req.method) && readCookie(c.req.raw, CSRF_COOKIE) === undefined
+
+  try {
+    await next()
+  } finally {
+    // Set after the chain: Hono merges headers onto the response only once the
+    // handler has produced it, and the finally keeps the token available even
+    // when the request is rejected.
+    if (shouldIssue) {
+      const token = base64UrlEncode(crypto.getRandomValues(new Uint8Array(24)))
+      c.header(
+        'Set-Cookie',
+        `${CSRF_COOKIE}=${token}; ${csrfCookieOptions(new Date(Date.now() + ISSUER_TTL_MS))}`,
+        { append: true },
+      )
+    }
   }
-  await next()
 }
