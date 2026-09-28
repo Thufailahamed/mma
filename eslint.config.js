@@ -58,6 +58,8 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
+      // Test doubles declare async to match the interface they stand in for.
+      '@typescript-eslint/require-await': 'off',
     },
   },
   {
