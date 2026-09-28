@@ -1,0 +1,14 @@
+{
+  // OpenNext populates the rest of this file during `opennextjs-cloudflare build`.
+  // It exists so the CLI's config check passes in a monorepo, where it looks
+  // in the project root rather than the workspace root.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mma-web-staging",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-02-04",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  }
+}

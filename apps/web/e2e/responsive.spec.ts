@@ -6,7 +6,10 @@ for (const width of WIDTHS) {
   test(`no horizontal scroll at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 })
     await page.goto('/')
-    await page.waitForLoadState('networkidle')
+    // 'networkidle' never settles behind a deployed Worker, which keeps
+    // connections open. Wait for a deterministic signal instead.
+    await page.waitForLoadState('load')
+    await page.locator('main h1').first().waitFor()
 
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
