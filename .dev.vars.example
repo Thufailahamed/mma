@@ -1,0 +1,6 @@
+DATABASE_NAME=DB
+MEDIA_BUCKET_NAME=mma-media
+SESSION_SECRET=replace-with-openssl-rand-base64-32
+ENVIRONMENT=development
+SEED_ADMIN_EMAIL=admin@mma.local
+SEED_ADMIN_PASSWORD=change-me-before-first-run

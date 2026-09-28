@@ -1,0 +1,20 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+  - 'workers/*'
+
+# esbuild and workerd ship native binaries via postinstall and must be allowed
+# to build. workerd is the Cloudflare Workers runtime; without it wrangler dev
+# cannot start.
+allowBuilds:
+  esbuild: true
+  workerd: true
+
+# pnpm's default 24h supply-chain age policy rejects these four. They are the
+# Cloudflare Workers runtime and the Hono router, and @opennextjs/cloudflare 1.20
+# requires wrangler ^4.125. Excluded deliberately, not to bypass the policy.
+minimumReleaseAgeExclude:
+  - '@cloudflare/workers-types'
+  - wrangler
+  - miniflare
+  - hono

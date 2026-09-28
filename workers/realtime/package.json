@@ -1,0 +1,16 @@
+{
+  "name": "@mma/realtime",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./middleware": "./src/middleware.ts",
+    "./rate-limiter": "./src/rate-limiter.ts"
+  },
+  "scripts": { "typecheck": "tsc --noEmit" },
+  "dependencies": { "hono": "^4.13.10" },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260928.1",
+    "typescript": "5.9.3"
+  }
+}

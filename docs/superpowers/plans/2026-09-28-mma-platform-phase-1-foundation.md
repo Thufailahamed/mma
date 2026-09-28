@@ -3273,7 +3273,7 @@ git commit -m "feat(api): repositories and injectable auth service with hashed p
 
 **Interfaces:**
 - Consumes: `Env`/`SessionUser` from Task 6; `session-service` from Task 9; `ratelimit` from Task 5; `AppError` from Task 6.
-- Produces: `csrf()` middleware; `requireAuth()` middleware setting `c.var.user`; `requireRole(role)` middleware; `anonymousRateLimit()` and `authedRateLimit()` middleware; `readCookie(request, name): string | undefined`.
+- Produces: `csrf()` middleware; `csrfIssuer()` middleware setting `mma_csrf` on safe requests; `requireAuth()` middleware setting `c.var.user`; `requireRole(role)` middleware; `anonymousRateLimit()` and `authedRateLimit()` middleware; `readCookie(request, name): string | undefined`.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -3443,7 +3443,40 @@ export function csrf(): MiddlewareHandler {
 }
 ```
 
-- [ ] **Step 5: Write the auth middleware**
+- [ ] **Step 5: Write the CSRF issuer middleware**
+
+`apps/api/src/middleware/csrf-issuer.ts`:
+
+```ts
+import type { MiddlewareHandler } from 'hono'
+import { readCookie } from './cookies'
+import { base64UrlEncode } from '../crypto/encoding'
+import { CSRF_COOKIE, csrfCookieOptions } from '../services/session-service'
+
+const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
+const ISSUER_TTL_MS = 24 * 60 * 60 * 1000
+
+/**
+ * The double-submit pattern needs the browser to hold a token before its first
+ * mutating request. Without this, `POST /api/auth/register` from a fresh
+ * browser has no cookie to echo and is rejected forever.
+ */
+export function csrfIssuer(): MiddlewareHandler {
+  return async (c, next) => {
+    if (SAFE_METHODS.has(c.req.method) && readCookie(c.req.raw, CSRF_COOKIE) === undefined) {
+      const token = base64UrlEncode(crypto.getRandomValues(new Uint8Array(24)))
+      c.header(
+        'Set-Cookie',
+        `${CSRF_COOKIE}=${token}; ${csrfCookieOptions(new Date(Date.now() + ISSUER_TTL_MS))}`,
+        { append: true },
+      )
+    }
+    await next()
+  }
+}
+```
+
+- [ ] **Step 6: Write the auth middleware**
 
 `apps/api/src/middleware/require-auth.ts`:
 
@@ -3482,7 +3515,7 @@ export const createHonoMiddleware = createMiddlewareFactory<AppEnv>()
 export { AppError }
 ```
 
-- [ ] **Step 6: Write the role middleware**
+- [ ] **Step 7: Write the role middleware**
 
 `apps/api/src/middleware/require-role.ts`:
 
@@ -3504,7 +3537,7 @@ export function requireRole(required: UserRole) {
 }
 ```
 
-- [ ] **Step 7: Write the rate-limit middlewares**
+- [ ] **Step 8: Write the rate-limit middlewares**
 
 `apps/api/src/middleware/rate-limit.ts`:
 
@@ -3535,16 +3568,16 @@ export const authedRateLimit = ratelimit({
 })
 ```
 
-- [ ] **Step 8: Run the test to verify it passes**
+- [ ] **Step 9: Run the test to verify it passes**
 
 Run: `pnpm --filter @mma/api test`
 Expected: PASS — 90 tests.
 
-- [ ] **Step 9: Commit**
+- [ ] **Step 10: Commit**
 
 ```bash
 git add -A
-git commit -m "feat(api): csrf, session auth, role, and rate-limit middleware"
+git commit -m "feat(api): csrf issuance and enforcement, session auth, role, rate limiting"
 ```
 
 ---
@@ -3941,6 +3974,7 @@ import { AppError } from '@mma/shared'
 import type { Env, SessionUser } from './env'
 import { fail, toAppError } from './errors'
 import { csrf } from './middleware/csrf'
+import { csrfIssuer } from './middleware/csrf-issuer'
 import { anonymousRateLimit, authedRateLimit } from './middleware/rate-limit'
 import { requireAuth } from './middleware/require-auth'
 import { requireRole } from './middleware/require-role'
@@ -3964,6 +3998,7 @@ app.use('*', async (c, next) => {
 
 app.use('*', securityHeaders())
 app.use('*', anonymousRateLimit())
+app.use('*', csrfIssuer())
 
 app.onError((cause, c) => {
   const requestId = c.get('requestId') ?? crypto.randomUUID()

@@ -1,0 +1,30 @@
+{
+  "name": "mma",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.21.0",
+  "engines": {
+    "node": ">=22.11"
+  },
+  "scripts": {
+    "dev": "concurrently -n api,web -c magenta,cyan \"pnpm --filter @mma/api dev\" \"pnpm --filter @mma/web dev\"",
+    "build": "pnpm --filter @mma/web build",
+    "typecheck": "pnpm -r --parallel typecheck",
+    "lint": "eslint .",
+    "test": "pnpm --filter @mma/api test",
+    "test:e2e": "pnpm --filter @mma/web test:e2e",
+    "db:generate": "pnpm --filter @mma/db generate",
+    "db:migrate:local": "pnpm --filter @mma/api migrate:local",
+    "db:migrate:remote": "pnpm --filter @mma/api migrate:remote",
+    "db:seed:admin": "node scripts/seed-admin.mjs",
+    "db:seed": "pnpm db:seed:admin && pnpm --filter @mma/api seed:local"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "concurrently": "^10.0.5",
+    "eslint": "^10.11.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.70.1",
+    "wrangler": "^4.142.0"
+  }
+}
