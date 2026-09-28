@@ -2,7 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "mma-api",
   "main": "src/index.ts",
-  "compatibility_date": "2026-09-26",
+  "compatibility_date": "2026-02-04",
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true },
 
@@ -10,7 +10,7 @@
     {
       "binding": "DB",
       "database_name": "mma-db",
-      "database_id": "00000000-0000-4000-8000-000000000000",
+      "database_id": "c3528031-861c-4969-b75b-7fe4748e9606",
       "migrations_dir": "../../database/migrations"
     }
   ],
@@ -42,6 +42,9 @@
     "ENVIRONMENT": "development"
   },
 
+  // NOTE: durable_objects and migrations are NOT inherited by named
+  // environments in wrangler. Both must be repeated per environment or a
+  // staging/production deploy ships with no rate limiter binding.
   "env": {
     "staging": {
       "name": "mma-api-staging",
@@ -49,7 +52,7 @@
         {
           "binding": "DB",
           "database_name": "mma-db-staging",
-          "database_id": "00000000-0000-4000-8000-000000000000",
+          "database_id": "f3221be2-c71d-45f0-82b2-b91f871f5ea3",
           "migrations_dir": "../../database/migrations"
         }
       ],
@@ -59,7 +62,25 @@
           "bucket_name": "mma-media-staging"
         }
       ],
-      "vars": { "ENVIRONMENT": "staging", "RATE_LIMIT_ANONYMOUS": "60", "RATE_LIMIT_AUTHED": "300" }
+      "durable_objects": {
+        "bindings": [
+          {
+            "name": "RATE_LIMITER",
+            "class_name": "RateLimiter"
+          }
+        ]
+      },
+      "migrations": [
+        {
+          "tag": "v1",
+          "new_sqlite_classes": ["RateLimiter"]
+        }
+      ],
+      "vars": {
+        "ENVIRONMENT": "staging",
+        "RATE_LIMIT_ANONYMOUS": "60",
+        "RATE_LIMIT_AUTHED": "300"
+      }
     },
     "production": {
       "name": "mma-api-production",
@@ -67,7 +88,7 @@
         {
           "binding": "DB",
           "database_name": "mma-db-production",
-          "database_id": "00000000-0000-4000-8000-000000000000",
+          "database_id": "ed5d8bcc-1ddd-4c5f-a2b0-c9c8965fb3f7",
           "migrations_dir": "../../database/migrations"
         }
       ],
@@ -77,7 +98,25 @@
           "bucket_name": "mma-media-production"
         }
       ],
-      "vars": { "ENVIRONMENT": "production", "RATE_LIMIT_ANONYMOUS": "60", "RATE_LIMIT_AUTHED": "300" }
+      "durable_objects": {
+        "bindings": [
+          {
+            "name": "RATE_LIMITER",
+            "class_name": "RateLimiter"
+          }
+        ]
+      },
+      "migrations": [
+        {
+          "tag": "v1",
+          "new_sqlite_classes": ["RateLimiter"]
+        }
+      ],
+      "vars": {
+        "ENVIRONMENT": "production",
+        "RATE_LIMIT_ANONYMOUS": "60",
+        "RATE_LIMIT_AUTHED": "300"
+      }
     }
   }
 }
